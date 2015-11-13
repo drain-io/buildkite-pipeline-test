@@ -1,0 +1,7 @@
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+PROJECT_DIR=$(dirname $SCRIPT_DIR)
+TARGET_DIR=$PROJECT_DIR/target
+LOCAL_MAVEN_REPO=$TARGET_DIR/maven-repo
+KARAF_HOME=${KARAF_HOME:-/opt/karaf}
+
+
