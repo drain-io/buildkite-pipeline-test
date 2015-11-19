@@ -3,12 +3,11 @@ set -exo pipefail
 
 . $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/prepare
 
-. $SCRIPT_DIR/.credentials
-. $SCRIPT_DIR/create_settings.sh
+. $SCRIPT_DIR/setup_credentials.sh
 
 mkdir -p $TARGET_DIR
 
-create_settings
+github_settings
 
 mkdir -p $LOCAL_MAVEN_REPO
 
@@ -17,8 +16,10 @@ rm -rf $LOCAL_MAVEN_REPO/.indexes/* || true
 rm -rf $HOME/.judo-npm/* || true
 rm -rf $HOME/.judo-frontend/* || true
 
-mvn -DaltDeploymentRepository=local-repository::default::file://$LOCAL_MAVEN_REPO --batch-mode clean deploy --settings $TARGET_DIR/maven-settings.xml
+mvn -DaltDeploymentRepository=local-repository::default::file://$LOCAL_MAVEN_REPO --batch-mode clean deploy
 
-
+for kar in `find $LOCAL_MAVEN_REPO -type f | sed -n "/.*.kar$/p"`; do
+	zip -d $kar "*maven-metadata-local.xml"
+done
 
 

@@ -1,0 +1,44 @@
+env:
+  THIS_WILL_APPLY_TO_ALL: true
+
+steps:
+  - name: ":bundler:"
+    command: "bundle install -j8"
+    concurrency: 1
+    concurrency_group: bundler
+
+  - wait
+
+  - name: ":rubocop:"
+    command: "script/buildkite/rubocop"
+
+  - name: ":brakeman:"
+    command: "script/buildkite/brakeman"
+
+  - name: ":eslint:"
+    command: "script/buildkite/eslint"
+
+  - name: ":rspec:"
+    command: "script/buildkite/rspec"
+    artifact_paths: "tmp/capybara/**/*;coverage/**/*"
+    parallelism: 6
+
+  - block
+
+  - name: ":shipit:"
+    command: "script/buildkite/deploy"
+    branches: "master"
+    env:
+      DEPLOY_KEY: "xxx"
+    agents:
+      queue: deploy
+    concurrency: 1
+    concurrency_group: deploy
+
+  - block: "Rollback"
+
+  - command: "script/buildkite/rollback"
+    agents:
+      queue: deploy
+    concurrency: 1
+    concurrency_group: rollback
